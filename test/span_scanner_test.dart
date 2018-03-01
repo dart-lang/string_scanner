@@ -9,11 +9,11 @@ import 'package:test/test.dart';
 import 'utils.dart';
 
 void main() {
-  testForImplementation("lazy", ([string]) {
+  testForImplementation("lazy", ([String string]) {
     return new SpanScanner(string ?? 'foo\nbar\nbaz', sourceUrl: 'source');
   });
 
-  testForImplementation("eager", ([string]) {
+  testForImplementation("eager", ([String string]) {
     return new SpanScanner.eager(string ?? 'foo\nbar\nbaz',
         sourceUrl: 'source');
   });
@@ -104,7 +104,7 @@ void main() {
   });
 }
 
-void testForImplementation(String name, SpanScanner create()) {
+void testForImplementation(String name, SpanScanner create([String string])) {
   group("for a $name scanner", () {
     var scanner;
     setUp(() => scanner = create());
