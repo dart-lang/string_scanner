@@ -93,8 +93,8 @@ void main() {
 
     test(".error() uses an absolute span", () {
       scanner.expect("foo");
-      expect(() => scanner.error('oh no!'),
-          throwsStringScannerException("foo"));
+      expect(
+          () => scanner.error('oh no!'), throwsStringScannerException("foo"));
     });
 
     test(".isDone returns true at the end of the span", () {
