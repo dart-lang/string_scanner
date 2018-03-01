@@ -6,13 +6,14 @@ dart:
 
 dart_task:
   - test: --platform vm,chrome
-  - dartanalyzer
 
 matrix:
   include:
     # Only validate formatting using the dev release
     - dart: dev
       dart_task: dartfmt
+    - dart: dev
+      dart_task: analyzer
 
 # Only building master means that we don't run two builds for each pull request.
 branches:
