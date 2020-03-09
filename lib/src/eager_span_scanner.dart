@@ -31,8 +31,7 @@ class EagerSpanScanner extends SpanScanner {
 
   @override
   set state(LineScannerState state) {
-    if (state is! _EagerSpanScannerState ||
-        !identical((state as _EagerSpanScannerState)._scanner, this)) {
+    if (state is! _EagerSpanScannerState || !identical(state._scanner, this)) {
       throw ArgumentError('The given LineScannerState was not returned by '
           'this LineScanner.');
     }
@@ -69,7 +68,7 @@ class EagerSpanScanner extends SpanScanner {
     }
   }
 
-  EagerSpanScanner(String string, {sourceUrl, int position})
+  EagerSpanScanner(String string, {sourceUrl, int? position})
       : super(string, sourceUrl: sourceUrl, position: position);
 
   @override
@@ -100,12 +99,12 @@ class EagerSpanScanner extends SpanScanner {
   bool scan(Pattern pattern) {
     if (!super.scan(pattern)) return false;
 
-    var newlines = _newlinesIn(lastMatch[0]);
+    var newlines = _newlinesIn(lastMatch![0]);
     _line += newlines.length;
     if (newlines.isEmpty) {
-      _column += lastMatch[0].length;
+      _column += lastMatch![0].length;
     } else {
-      _column = lastMatch[0].length - newlines.last.end;
+      _column = lastMatch![0].length - newlines.last.end;
     }
 
     return true;

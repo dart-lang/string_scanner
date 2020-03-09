@@ -36,15 +36,15 @@ class StringScanner {
   /// The data about the previous match made by the scanner.
   ///
   /// If the last match failed, this will be `null`.
-  Match get lastMatch {
+  Match? get lastMatch {
     // Lazily unset [_lastMatch] so that we avoid extra assignments in
     // character-by-character methods that are used in core loops.
     if (_position != _lastMatchPosition) _lastMatch = null;
     return _lastMatch;
   }
 
-  Match _lastMatch;
-  int _lastMatchPosition;
+  Match? _lastMatch;
+  int? _lastMatchPosition;
 
   /// The portion of the string that hasn't yet been scanned.
   String get rest => string.substring(position);
@@ -57,7 +57,7 @@ class StringScanner {
   /// [position] defaults to 0, the beginning of the string. [sourceUrl] is the
   /// URL of the source of the string being scanned, if available. It can be
   /// a [String], a [Uri], or `null`.
-  StringScanner(this.string, {sourceUrl, int position})
+  StringScanner(this.string, {sourceUrl, int? position})
       : sourceUrl =
             sourceUrl is String ? Uri.parse(sourceUrl) : sourceUrl as Uri {
     if (position != null) this.position = position;
@@ -79,7 +79,7 @@ class StringScanner {
   ///
   /// This returns `null` if [offset] points outside the string. It doesn't
   /// affect [lastMatch].
-  int peekChar([int offset]) {
+  int? peekChar([int? offset]) {
     offset ??= 0;
     var index = position + offset;
     if (index < 0 || index >= string.length) return null;
@@ -102,7 +102,7 @@ class StringScanner {
   /// describing the position of the failure. [name] is used in this error as
   /// the expected name of the character being matched; if it's `null`, the
   /// character itself is used instead.
-  void expectChar(int character, {String name}) {
+  void expectChar(int character, {String? name}) {
     if (scanChar(character)) return;
 
     if (name == null) {
@@ -125,7 +125,7 @@ class StringScanner {
   bool scan(Pattern pattern) {
     var success = matches(pattern);
     if (success) {
-      _position = _lastMatch.end;
+      _position = _lastMatch!.end;
       _lastMatchPosition = _position;
     }
     return success;
@@ -138,7 +138,7 @@ class StringScanner {
   /// position of the failure. [name] is used in this error as the expected name
   /// of the pattern being matched; if it's `null`, the pattern itself is used
   /// instead.
-  void expect(Pattern pattern, {String name}) {
+  void expect(Pattern pattern, {String? name}) {
     if (scan(pattern)) return;
 
     if (name == null) {
@@ -175,7 +175,7 @@ class StringScanner {
   ///
   /// Unlike [String.substring], [end] defaults to [position] rather than the
   /// end of the string.
-  String substring(int start, [int end]) {
+  String substring(int start, [int? end]) {
     end ??= position;
     return string.substring(start, end);
   }
@@ -194,7 +194,7 @@ class StringScanner {
   ///
   /// It's an error to pass [match] at the same time as [position] or [length].
   @alwaysThrows
-  void error(String message, {Match match, int position, int length}) {
+  void error(String message, {Match? match, int? position, int? length}) {
     validateErrorArgs(string, match, position, length);
 
     if (match == null && position == null && length == null) match = lastMatch;

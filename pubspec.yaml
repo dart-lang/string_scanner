@@ -5,7 +5,7 @@ description: A class for parsing strings using a sequence of patterns.
 homepage: https://github.com/dart-lang/string_scanner
 
 environment:
-  sdk: '>=2.0.0 <3.0.0'
+  sdk: '>=2.8.0-dev <3.0.0'
 
 dependencies:
   charcode: ^1.1.0
