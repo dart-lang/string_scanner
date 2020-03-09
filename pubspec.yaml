@@ -15,3 +15,8 @@ dependencies:
 dev_dependencies:
   test: ^1.0.0
 
+dependency_overrides:
+  source_span:
+    git:
+      url: https://github.com/dart-lang/source_span
+      ref: null_safety
