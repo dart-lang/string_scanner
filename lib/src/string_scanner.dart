@@ -15,7 +15,7 @@ class StringScanner {
   ///
   /// This is used for error reporting. It may be `null`, indicating that the
   /// source URL is unknown or unavailable.
-  final Uri sourceUrl;
+  final Uri? sourceUrl;
 
   /// The string being scanned through.
   final String string;
@@ -58,8 +58,9 @@ class StringScanner {
   /// URL of the source of the string being scanned, if available. It can be
   /// a [String], a [Uri], or `null`.
   StringScanner(this.string, {sourceUrl, int? position})
-      : sourceUrl =
-            sourceUrl is String ? Uri.parse(sourceUrl) : sourceUrl as Uri {
+      : sourceUrl = sourceUrl == null
+            ? null
+            : sourceUrl is String ? Uri.parse(sourceUrl) : sourceUrl as Uri {
     if (position != null) this.position = position;
   }
 
