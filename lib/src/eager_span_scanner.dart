@@ -98,13 +98,14 @@ class EagerSpanScanner extends SpanScanner {
   @override
   bool scan(Pattern pattern) {
     if (!super.scan(pattern)) return false;
+    var firstMatch = (lastMatch![0])!;
 
-    var newlines = _newlinesIn((lastMatch![0])!);
+    var newlines = _newlinesIn(firstMatch);
     _line += newlines.length;
     if (newlines.isEmpty) {
-      _column += (lastMatch![0])!.length;
+      _column += firstMatch.length;
     } else {
-      _column = (lastMatch![0])!.length - newlines.last.end;
+      _column = firstMatch.length - newlines.last.end;
     }
 
     return true;
