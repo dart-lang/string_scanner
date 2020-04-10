@@ -9,7 +9,6 @@ environment:
 
 dependencies:
   charcode: ^1.1.0
-  meta: ^1.1.0
   source_span: ^1.4.0
 
 dev_dependencies:

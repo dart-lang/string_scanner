@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:charcode/charcode.dart';
-import 'package:meta/meta.dart';
 import 'package:source_span/source_span.dart';
 
 import 'exception.dart';
@@ -194,8 +193,7 @@ class StringScanner {
   /// position; if only [position] is passed, [length] defaults to 0.
   ///
   /// It's an error to pass [match] at the same time as [position] or [length].
-  @alwaysThrows
-  void error(String message, {Match? match, int? position, int? length}) {
+  Never error(String message, {Match? match, int? position, int? length}) {
     validateErrorArgs(string, match, position, length);
 
     if (match == null && position == null && length == null) match = lastMatch;
@@ -210,7 +208,7 @@ class StringScanner {
   // TODO(nweiz): Make this handle long lines more gracefully.
   /// Throws a [FormatException] describing that [name] is expected at the
   /// current position in the string.
-  void _fail(String name) {
+  Never _fail(String name) {
     error('expected $name.', position: position, length: 0);
   }
 }
