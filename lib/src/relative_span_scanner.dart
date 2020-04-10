@@ -91,7 +91,7 @@ class RelativeSpanScanner extends StringScanner implements SpanScanner {
   }
 
   @override
-  void error(String message, {Match? match, int? position, int? length}) {
+  Never error(String message, {Match? match, int? position, int? length}) {
     validateErrorArgs(string, match, position, length);
 
     if (match == null && position == null && length == null) match = lastMatch;
