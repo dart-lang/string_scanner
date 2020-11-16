@@ -8,6 +8,9 @@ const int $backslash = 0x5C;
 /// "Carriage return" control character.
 const int $cr = 0x0D;
 
+/// Character '"'.
+const int $doubleQuote = 0x22;
+
 /// Character 'f'.
 const int $f = 0x66;
 

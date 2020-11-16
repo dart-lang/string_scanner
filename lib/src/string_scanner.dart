@@ -110,7 +110,7 @@ class StringScanner {
     if (name == null) {
       if (character == $backslash) {
         name = r'"\"';
-      } else if (character == $double_quote) {
+      } else if (character == $doubleQuote) {
         name = r'"\""';
       } else {
         name = '"${String.fromCharCode(character)}"';
