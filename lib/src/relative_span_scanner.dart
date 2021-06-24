@@ -47,13 +47,17 @@ class RelativeSpanScanner extends StringScanner implements SpanScanner {
 
   @override
   set state(LineScannerState state) {
-    if (state is! _SpanScannerState || !identical(state._scanner, this)) {
+    if (!isClassState(state)) {
       throw ArgumentError('The given LineScannerState was not returned by '
           'this LineScanner.');
     }
 
     position = state.position;
   }
+
+  @override
+  bool isClassState(LineScannerState state) =>
+      state is _SpanScannerState && identical(state._scanner, this);
 
   @override
   FileSpan? get lastSpan => _lastSpan;

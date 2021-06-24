@@ -3,3 +3,5 @@
 .pub/
 .packages
 pubspec.lock
+
+docs/

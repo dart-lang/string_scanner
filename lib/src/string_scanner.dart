@@ -84,7 +84,7 @@ class StringScanner {
   int? peekChar([int? offset]) {
     offset ??= 0;
     final index = position + offset;
-    if (index < 0 || index >= string.length) return null;
+    if (index.isNegative || index >= string.length) return null;
     return string.codeUnitAt(index);
   }
 
