@@ -89,6 +89,13 @@ class LineScanner extends StringScanner {
     return character;
   }
 
+  @override
+  int readCodePoint() {
+    final codePoint = super.readCodePoint();
+    _adjustLineAndColumn(codePoint);
+    return codePoint;
+  }
+
   /// Adjusts [_line] and [_column] after having consumed [character].
   void _adjustLineAndColumn(int character) {
     if (character == $lf || (character == $cr && peekChar() != $lf)) {

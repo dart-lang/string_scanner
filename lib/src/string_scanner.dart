@@ -90,15 +90,34 @@ class StringScanner {
 
   /// If the next character in the string is [character], consumes it.
   ///
+  /// If [character] is a Unicode code point in a supplementary plane, this will
+  /// consume two code units. Dart's string representation is UTF-16, which
+  /// represents supplementary-plane code units as two code units.
+  ///
   /// Returns whether or not [character] was consumed.
   bool scanChar(int character) {
-    if (isDone) return false;
-    if (string.codeUnitAt(_position) != character) return false;
-    _position++;
-    return true;
+    if (inSupplementaryPlane(character)) {
+      if (_position + 1 >= string.length ||
+          string.codeUnitAt(_position) != highSurrogate(character) ||
+          string.codeUnitAt(_position + 1) != lowSurrogate(character)) {
+        return false;
+      } else {
+        _position += 2;
+        return true;
+      }
+    } else {
+      if (isDone) return false;
+      if (string.codeUnitAt(_position) != character) return false;
+      _position++;
+      return true;
+    }
   }
 
   /// If the next character in the string is [character], consumes it.
+  ///
+  /// If [character] is a Unicode code point in a supplementary plane, this will
+  /// consume two code units. Dart's string representation is UTF-16, which
+  /// represents supplementary-plane code units as two code units.
   ///
   /// If [character] could not be consumed, throws a [FormatException]
   /// describing the position of the failure. [name] is used in this error as
@@ -118,6 +137,45 @@ class StringScanner {
     }
 
     _fail(name);
+  }
+
+  /// Consumes a single Unicode code unit and returns it.
+  ///
+  /// This works like [readChar], except that it automatically handles UTF-16
+  /// surrogate pairs. Specifically, if the next character is a high surrogate,
+  /// it consumes it as well as the following character and returns the resolved
+  /// Unicode code point.
+  ///
+  /// If the scanner is looking at an unpaired surrogate, this returns the high
+  /// surrogate as-is.
+  int readCodePoint() {
+    final first = readChar();
+    if (!isHighSurrogate(first)) return first;
+
+    final next = peekChar();
+    if (next == null || !isLowSurrogate(next)) return first;
+
+    readChar();
+    return decodeSurrogatePair(first, next);
+  }
+
+  /// Returns the Unicode code point immediately after [position].
+  ///
+  /// This works like [peekChar], except that it automatically handles UTF-16
+  /// surrogate pairs. Specifically, if the next character is a high surrogate,
+  /// it consumes it as well as the following character and returns the resolved
+  /// Unicode code point.
+  ///
+  /// If the scanner is looking at an unpaired surrogate, this returns the high
+  /// surrogate as-is.
+  int? peekCodePoint() {
+    final first = peekChar();
+    if (first == null || !isHighSurrogate(first)) return first;
+
+    final next = peekChar(1);
+    if (next == null || !isLowSurrogate(next)) return first;
+
+    return decodeSurrogatePair(first, next);
   }
 
   /// If [pattern] matches at the current position of the string, scans forward

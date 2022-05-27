@@ -36,8 +36,20 @@ void main() {
       expect(scanner.position, equals(0));
     });
 
+    test("readCodePoint fails and doesn't change the state", () {
+      expect(scanner.readCodePoint, throwsFormatException);
+      expect(scanner.lastMatch, isNull);
+      expect(scanner.position, equals(0));
+    });
+
     test("peekChar returns null and doesn't change the state", () {
       expect(scanner.peekChar(), isNull);
+      expect(scanner.lastMatch, isNull);
+      expect(scanner.position, equals(0));
+    });
+
+    test("peekCodePoint returns null and doesn't change the state", () {
+      expect(scanner.peekCodePoint(), isNull);
       expect(scanner.lastMatch, isNull);
       expect(scanner.position, equals(0));
     });
@@ -118,6 +130,12 @@ void main() {
       expect(scanner.position, equals(1));
     });
 
+    test('readCodePoint returns the first character and moves forward', () {
+      expect(scanner.readCodePoint(), equals(0x66));
+      expect(scanner.lastMatch, isNull);
+      expect(scanner.position, equals(1));
+    });
+
     test('peekChar returns the first character', () {
       expect(scanner.peekChar(), equals(0x66));
       expect(scanner.lastMatch, isNull);
@@ -126,6 +144,12 @@ void main() {
 
     test('peekChar with an argument returns the nth character', () {
       expect(scanner.peekChar(4), equals(0x62));
+      expect(scanner.lastMatch, isNull);
+      expect(scanner.position, equals(0));
+    });
+
+    test('peekCodePoint returns the first character', () {
+      expect(scanner.peekCodePoint(), equals(0x66));
       expect(scanner.lastMatch, isNull);
       expect(scanner.position, equals(0));
     });
@@ -275,6 +299,13 @@ void main() {
       expect(scanner.position, equals(4));
     });
 
+    test('readCodePoint returns the first character and unsets the last match',
+        () {
+      expect(scanner.readCodePoint(), equals($space));
+      expect(scanner.lastMatch, isNull);
+      expect(scanner.position, equals(4));
+    });
+
     test('a matching scanChar returns true and unsets the last match', () {
       expect(scanner.scanChar($space), isTrue);
       expect(scanner.lastMatch, isNull);
@@ -314,8 +345,20 @@ void main() {
       expect(scanner.position, equals(7));
     });
 
+    test("readCodePoint fails and doesn't change the state", () {
+      expect(scanner.readCodePoint, throwsFormatException);
+      expect(scanner.lastMatch, isNotNull);
+      expect(scanner.position, equals(7));
+    });
+
     test("peekChar returns null and doesn't change the state", () {
       expect(scanner.peekChar(), isNull);
+      expect(scanner.lastMatch, isNotNull);
+      expect(scanner.position, equals(7));
+    });
+
+    test("peekCodePoint returns null and doesn't change the state", () {
+      expect(scanner.peekCodePoint(), isNull);
       expect(scanner.lastMatch, isNotNull);
       expect(scanner.position, equals(7));
     });
@@ -390,6 +433,57 @@ void main() {
       expect(() {
         scanner.position = -1;
       }, throwsArgumentError);
+    });
+  });
+
+  group('before a surrogate pair', () {
+    final codePoint = '👭'.runes.first;
+    final highSurrogate = '👭'.codeUnitAt(0);
+
+    late StringScanner scanner;
+    setUp(() {
+      scanner = StringScanner('foo: 👭');
+      expect(scanner.scan('foo: '), isTrue);
+    });
+
+    test('readChar returns the high surrogate and moves into the pair', () {
+      expect(scanner.readChar(), equals(highSurrogate));
+      expect(scanner.position, equals(6));
+    });
+
+    test('readCodePoint returns the code unit and moves past the pair', () {
+      expect(scanner.readCodePoint(), equals(codePoint));
+      expect(scanner.position, equals(7));
+    });
+
+    test('peekChar returns the high surrogate', () {
+      expect(scanner.peekChar(), equals(highSurrogate));
+      expect(scanner.position, equals(5));
+    });
+
+    test('peekCodePoint returns the code unit', () {
+      expect(scanner.peekCodePoint(), equals(codePoint));
+      expect(scanner.position, equals(5));
+    });
+
+    test('scanChar with the high surrogate moves into the pair', () {
+      expect(scanner.scanChar(highSurrogate), isTrue);
+      expect(scanner.position, equals(6));
+    });
+
+    test('scanChar with the code point moves past the pair', () {
+      expect(scanner.scanChar(codePoint), isTrue);
+      expect(scanner.position, equals(7));
+    });
+
+    test('expectChar with the high surrogate moves into the pair', () {
+      scanner.expectChar(highSurrogate);
+      expect(scanner.position, equals(6));
+    });
+
+    test('scanChar with the code point moves past the pair', () {
+      scanner.expectChar(codePoint);
+      expect(scanner.position, equals(7));
     });
   });
 
