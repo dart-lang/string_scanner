@@ -142,12 +142,11 @@ class StringScanner {
   /// Consumes a single Unicode code unit and returns it.
   ///
   /// This works like [readChar], except that it automatically handles UTF-16
-  /// surrogate pairs. Specifically, if the next character is a high surrogate,
-  /// it consumes it as well as the following character and returns the resolved
-  /// Unicode code point.
+  /// surrogate pairs. Specifically, if the next two code units form a surrogate
+  /// pair, consumes them both and returns the corresponding Unicode code point.
   ///
-  /// If the scanner is looking at an unpaired surrogate, this returns the high
-  /// surrogate as-is.
+  /// If next two characters are not a surrogate pair, the next code unit is
+  /// returned as-is, even if it's an unpaired surrogate.
   int readCodePoint() {
     final first = readChar();
     if (!isHighSurrogate(first)) return first;
@@ -162,12 +161,11 @@ class StringScanner {
   /// Returns the Unicode code point immediately after [position].
   ///
   /// This works like [peekChar], except that it automatically handles UTF-16
-  /// surrogate pairs. Specifically, if the next character is a high surrogate,
-  /// it consumes it as well as the following character and returns the resolved
-  /// Unicode code point.
+  /// surrogate pairs. Specifically, if the next two code units form a surrogate
+  /// pair, returns the corresponding Unicode code point.
   ///
-  /// If the scanner is looking at an unpaired surrogate, this returns the high
-  /// surrogate as-is.
+  /// If next two characters are not a surrogate pair, the next code unit is
+  /// returned as-is, even if it's an unpaired surrogate.
   int? peekCodePoint() {
     final first = peekChar();
     if (first == null || !isHighSurrogate(first)) return first;

@@ -437,12 +437,12 @@ void main() {
   });
 
   group('before a surrogate pair', () {
-    final codePoint = '👭'.runes.first;
-    final highSurrogate = '👭'.codeUnitAt(0);
+    final codePoint = '\uD83D\uDC6D'.runes.first;
+    const highSurrogate = 0xD83D;
 
     late StringScanner scanner;
     setUp(() {
-      scanner = StringScanner('foo: 👭');
+      scanner = StringScanner('foo: \uD83D\uDC6D');
       expect(scanner.scan('foo: '), isTrue);
     });
 
@@ -481,9 +481,63 @@ void main() {
       expect(scanner.position, equals(6));
     });
 
-    test('scanChar with the code point moves past the pair', () {
+    test('expectChar with the code point moves past the pair', () {
       scanner.expectChar(codePoint);
       expect(scanner.position, equals(7));
+    });
+  });
+
+  group('before an invalid surrogate pair', () {
+    // This surrogate pair is invalid because U+E000 is just outside the range
+    // of low surrogates. If it were interpreted as a surrogate pair anyway, the
+    // value would be U+110000, which is outside of the Unicode gamut.
+    const codePoint = 0x110000;
+    const highSurrogate = 0xD800;
+
+    late StringScanner scanner;
+    setUp(() {
+      scanner = StringScanner('foo: \uD800\uE000');
+      expect(scanner.scan('foo: '), isTrue);
+    });
+
+    test('readChar returns the high surrogate and moves into the pair', () {
+      expect(scanner.readChar(), equals(highSurrogate));
+      expect(scanner.position, equals(6));
+    });
+
+    test('readCodePoint returns the high surrogate and moves past the pair',
+        () {
+      expect(scanner.readCodePoint(), equals(highSurrogate));
+      expect(scanner.position, equals(6));
+    });
+
+    test('peekChar returns the high surrogate', () {
+      expect(scanner.peekChar(), equals(highSurrogate));
+      expect(scanner.position, equals(5));
+    });
+
+    test('peekCodePoint returns the high surrogate', () {
+      expect(scanner.peekCodePoint(), equals(highSurrogate));
+      expect(scanner.position, equals(5));
+    });
+
+    test('scanChar with the high surrogate moves into the pair', () {
+      expect(scanner.scanChar(highSurrogate), isTrue);
+      expect(scanner.position, equals(6));
+    });
+
+    test('scanChar with the fake code point returns false', () {
+      expect(scanner.scanChar(codePoint), isFalse);
+      expect(scanner.position, equals(5));
+    });
+
+    test('expectChar with the high surrogate moves into the pair', () {
+      scanner.expectChar(highSurrogate);
+      expect(scanner.position, equals(6));
+    });
+
+    test('expectChar with the fake code point fails', () {
+      expect(() => scanner.expectChar(codePoint), throwsRangeError);
     });
   });
 

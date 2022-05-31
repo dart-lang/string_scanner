@@ -4,6 +4,7 @@
 
 import 'charcode.dart';
 import 'string_scanner.dart';
+import 'utils.dart';
 
 // Note that much of this code is duplicated in eager_span_scanner.dart.
 
@@ -89,20 +90,13 @@ class LineScanner extends StringScanner {
     return character;
   }
 
-  @override
-  int readCodePoint() {
-    final codePoint = super.readCodePoint();
-    _adjustLineAndColumn(codePoint);
-    return codePoint;
-  }
-
   /// Adjusts [_line] and [_column] after having consumed [character].
   void _adjustLineAndColumn(int character) {
     if (character == $lf || (character == $cr && peekChar() != $lf)) {
       _line += 1;
       _column = 0;
     } else {
-      _column += 1;
+      _column += inSupplementaryPlane(character) ? 2 : 1;
     }
   }
 
