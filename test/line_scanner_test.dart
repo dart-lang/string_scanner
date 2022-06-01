@@ -148,12 +148,12 @@ void main() {
   });
 
   group('before a surrogate pair', () {
-    final codePoint = '👭'.runes.first;
-    final highSurrogate = '👭'.codeUnitAt(0);
+    final codePoint = '\uD83D\uDC6D'.runes.first;
+    const highSurrogate = 0xD83D;
 
     late LineScanner scanner;
     setUp(() {
-      scanner = LineScanner('foo: 👭');
+      scanner = LineScanner('foo: \uD83D\uDC6D');
       expect(scanner.scan('foo: '), isTrue);
     });
 

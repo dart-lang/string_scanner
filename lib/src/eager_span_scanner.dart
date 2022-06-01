@@ -5,6 +5,7 @@
 import 'charcode.dart';
 import 'line_scanner.dart';
 import 'span_scanner.dart';
+import 'utils.dart';
 
 // TODO(nweiz): Currently this duplicates code in line_scanner.dart. Once
 // sdk#23770 is fully complete, we should move the shared code into a mixin.
@@ -84,20 +85,13 @@ class EagerSpanScanner extends SpanScanner {
     return character;
   }
 
-  @override
-  int readCodePoint() {
-    final codePoint = super.readCodePoint();
-    _adjustLineAndColumn(codePoint);
-    return codePoint;
-  }
-
   /// Adjusts [_line] and [_column] after having consumed [character].
   void _adjustLineAndColumn(int character) {
     if (character == $lf || (character == $cr && peekChar() != $lf)) {
       _line += 1;
       _column = 0;
     } else {
-      _column += 1;
+      _column += inSupplementaryPlane(character) ? 2 : 1;
     }
   }
 
