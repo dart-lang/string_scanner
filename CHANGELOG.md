@@ -1,3 +1,7 @@
+## 1.2.1-dev
+
+* Require Dart 2.18.0
+
 ## 1.2.0
 
 * Add better support for reading code points in the Unicode supplementary plane:
