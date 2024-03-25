@@ -154,6 +154,12 @@ void main() {
       expect(scanner.position, equals(0));
     });
 
+    test('peekCodePoint with an argument returns the nth character', () {
+      expect(scanner.peekCodePoint(4), equals(0x62));
+      expect(scanner.lastMatch, isNull);
+      expect(scanner.position, equals(0));
+    });
+
     test('a matching scanChar returns true moves forward', () {
       expect(scanner.scanChar($f), isTrue);
       expect(scanner.lastMatch, isNull);
