@@ -158,19 +158,23 @@ class StringScanner {
     return decodeSurrogatePair(first, next);
   }
 
-  /// Returns the Unicode code point immediately after [position].
+  /// Returns the Unicode code point [offset] away from [position].
   ///
   /// This works like [peekChar], except that it automatically handles UTF-16
   /// surrogate pairs. Specifically, if the next two code units form a surrogate
   /// pair, returns the corresponding Unicode code point.
   ///
+  /// [offset] defaults to zero, and may be negative to inspect already-consumed
+  /// characters.
+  ///
   /// If next two characters are not a surrogate pair, the next code unit is
   /// returned as-is, even if it's an unpaired surrogate.
-  int? peekCodePoint() {
-    final first = peekChar();
+  int? peekCodePoint([int? offset]) {
+    offset ??= 0;
+    final first = peekChar(offset);
     if (first == null || !isHighSurrogate(first)) return first;
 
-    final next = peekChar(1);
+    final next = peekChar(offset + 1);
     if (next == null || !isLowSurrogate(next)) return first;
 
     return decodeSurrogatePair(first, next);

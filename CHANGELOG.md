@@ -1,6 +1,8 @@
-## 1.2.1-wip
+## 1.3.0-wip
 
 * Require Dart 3.0.0
+* `StringScanner.peekCodePoint()` now accepts an optional `offset` argument like
+  `StringScanner.peekChar()`. 
 
 ## 1.2.0
 
