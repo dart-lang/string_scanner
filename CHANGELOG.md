@@ -1,3 +1,9 @@
+## 1.4.0
+
+* Fix `LineScanner`'s handling of `\r\n`'s so that only the `\n` is treated as
+  the end of the line, preventing errors scanning zero-length matches when
+  between CR and LF.
+
 ## 1.3.0
 
 * Require Dart 3.1.0

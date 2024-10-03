@@ -46,6 +46,15 @@ void main() {
       expect(scanner.line, equals(2));
       expect(scanner.column, equals(1));
     });
+
+    test('scanning a zero length match between CR LF does not fail', () {
+      scanner.expect('foo\nbar\r');
+      expect(scanner.line, equals(1));
+      expect(scanner.column, equals(4));
+      scanner.expect(RegExp('(?!x)'));
+      expect(scanner.line, equals(1));
+      expect(scanner.column, equals(4));
+    });
   });
 
   group('readChar()', () {
@@ -231,6 +240,27 @@ void main() {
       scanner.position = 8; // "foo\nbar\r"
       expect(scanner.line, equals(1));
       expect(scanner.column, equals(4));
+    });
+
+    test('backward to between CR LF', () {
+      scanner.scan('foo\nbar\r\nbaz');
+      scanner.position = 8; // "foo\nbar\r"
+      expect(scanner.line, equals(1));
+      expect(scanner.column, equals(4));
+    });
+
+    test('backward to after CR LF', () {
+      scanner.scan('foo\nbar\r\nbaz');
+      scanner.position = 9; // "foo\nbar\r\n"
+      expect(scanner.line, equals(2));
+      expect(scanner.column, equals(0));
+    });
+
+    test('backward to before CR LF', () {
+      scanner.scan('foo\nbar\r\nbaz');
+      scanner.position = 7; // "foo\nbar"
+      expect(scanner.line, equals(1));
+      expect(scanner.column, equals(3));
     });
   });
 

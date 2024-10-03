@@ -8,8 +8,9 @@ import 'utils.dart';
 
 // Note that much of this code is duplicated in eager_span_scanner.dart.
 
-/// A regular expression matching newlines across platforms.
-final _newlineRegExp = RegExp(r'\r\n?|\n');
+/// A regular expression matching newlines. We only treat \n as a line boundary,
+/// \r is just treated like any other character on the end of a line.
+final _newlineRegExp = RegExp(r'\n');
 
 /// A subclass of [StringScanner] that tracks line and column information.
 class LineScanner extends StringScanner {
@@ -30,10 +31,6 @@ class LineScanner extends StringScanner {
   /// This does not include the scanner's match information.
   LineScannerState get state =>
       LineScannerState._(this, position, line, column);
-
-  /// Whether the current position is between a CR character and an LF
-  /// charactet.
-  bool get _betweenCRLF => peekChar(-1) == $cr && peekChar() == $lf;
 
   set state(LineScannerState state) {
     if (!identical(state._scanner, this)) {
@@ -61,14 +58,14 @@ class LineScanner extends StringScanner {
       }
     } else {
       final newlines = _newlinesIn(string.substring(newPosition, oldPosition));
-      if (_betweenCRLF) newlines.removeLast();
 
       _line -= newlines.length;
       if (newlines.isEmpty) {
         _column -= oldPosition - newPosition;
       } else {
-        _column =
-            newPosition - string.lastIndexOf(_newlineRegExp, newPosition) - 1;
+        _column = newPosition -
+            string.lastIndexOf(_newlineRegExp, newPosition - 1) -
+            1;
       }
     }
   }
@@ -116,11 +113,8 @@ class LineScanner extends StringScanner {
 
   /// Returns a list of [Match]es describing all the newlines in [text], which
   /// is assumed to end at [position].
-  List<Match> _newlinesIn(String text) {
-    final newlines = _newlineRegExp.allMatches(text).toList();
-    if (_betweenCRLF) newlines.removeLast();
-    return newlines;
-  }
+  List<Match> _newlinesIn(String text) =>
+      _newlineRegExp.allMatches(text).toList();
 }
 
 /// A class representing the state of a [LineScanner].
