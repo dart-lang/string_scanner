@@ -89,13 +89,13 @@ class LineScanner extends StringScanner {
         // No we need to know the offset after the newline. This is the index
         // above plus the length of the newline (eg. if we found `\r\n`) we need
         // to add two. However if no newline was found, that index is 0.
-        final offsetLastAfterNewline = lastNewline == -1
+        final offsetAfterLastNewline = lastNewline == -1
             ? 0
             : string[lastNewline] == '\r' && string[lastNewline + 1] == '\n'
                 ? lastNewline + 2
                 : lastNewline + 1;
 
-        _column = newPosition - offsetLastAfterNewline;
+        _column = newPosition - offsetAfterLastNewline;
       }
     }
   }
