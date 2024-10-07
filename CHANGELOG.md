@@ -1,8 +1,8 @@
 ## 1.4.0
 
-* Fix `LineScanner`'s handling of `\r\n`'s so that only the `\n` is treated as
-  the end of the line, preventing errors scanning zero-length matches when
-  between CR and LF.
+* Fix `LineScanner`'s handling of `\r\n`'s to preventing errors scanning
+  zero-length matches when between CR and LF. CR is treated as a new line only
+  if not immediately followed by a LF.
 
 ## 1.3.0
 

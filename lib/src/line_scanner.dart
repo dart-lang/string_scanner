@@ -8,9 +8,9 @@ import 'utils.dart';
 
 // Note that much of this code is duplicated in eager_span_scanner.dart.
 
-/// A regular expression matching newlines. We only treat \n as a line boundary,
-/// \r is just treated like any other character on the end of a line.
-final _newlineRegExp = RegExp(r'\n');
+/// A regular expression matching newlines. A newline is either a `\n`, a `\r\n`
+/// or a `\r` that is not immediately followed by a `\n`.
+final _newlineRegExp = RegExp(r'\n|\r\n|\r(?!\n)');
 
 /// A subclass of [StringScanner] that tracks line and column information.
 class LineScanner extends StringScanner {
@@ -32,6 +32,10 @@ class LineScanner extends StringScanner {
   LineScannerState get state =>
       LineScannerState._(this, position, line, column);
 
+  /// Whether the current position is between a CR character and an LF
+  /// charactet.
+  bool get _betweenCRLF => peekChar(-1) == $cr && peekChar() == $lf;
+
   set state(LineScannerState state) {
     if (!identical(state._scanner, this)) {
       throw ArgumentError('The given LineScannerState was not returned by '
@@ -45,10 +49,17 @@ class LineScanner extends StringScanner {
 
   @override
   set position(int newPosition) {
+    if (newPosition == position) {
+      return;
+    }
+
     final oldPosition = position;
     super.position = newPosition;
 
-    if (newPosition > oldPosition) {
+    if (newPosition == 0) {
+      _line = 0;
+      _column = 0;
+    } else if (newPosition > oldPosition) {
       final newlines = _newlinesIn(string.substring(oldPosition, newPosition));
       _line += newlines.length;
       if (newlines.isEmpty) {
@@ -56,16 +67,35 @@ class LineScanner extends StringScanner {
       } else {
         _column = newPosition - newlines.last.end;
       }
-    } else {
+    } else if (newPosition < oldPosition) {
       final newlines = _newlinesIn(string.substring(newPosition, oldPosition));
 
       _line -= newlines.length;
       if (newlines.isEmpty) {
         _column -= oldPosition - newPosition;
       } else {
-        _column = newPosition -
-            string.lastIndexOf(_newlineRegExp, newPosition - 1) -
-            1;
+        // To compute the new column, we need to locate the last newline before
+        // the new position. When searching, we must exclude the CR if we're
+        // between a CRLF because it's not considered a newline.
+        final crOffset = _betweenCRLF ? -1 : 0;
+        // Additionally, if we use newPosition as the end of the search and the
+        // character at that position itself (the next character) is a newline
+        // we should not use it, so also offset to account for that.
+        const currentCharOffset = -1;
+        // Find the last newline.
+        final lastNewline = string.lastIndexOf(
+            _newlineRegExp, newPosition + currentCharOffset + crOffset);
+
+        // No we need to know the offset after the newline. This is the index
+        // above plus the length of the newline (eg. if we found `\r\n`) we need
+        // to add two. However if no newline was found, that index is 0.
+        final offsetLastAfterNewline = lastNewline == -1
+            ? 0
+            : string[lastNewline] == '\r' && string[lastNewline + 1] == '\n'
+                ? lastNewline + 2
+                : lastNewline + 1;
+
+        _column = newPosition - offsetLastAfterNewline;
       }
     }
   }
@@ -113,8 +143,20 @@ class LineScanner extends StringScanner {
 
   /// Returns a list of [Match]es describing all the newlines in [text], which
   /// is assumed to end at [position].
-  List<Match> _newlinesIn(String text) =>
-      _newlineRegExp.allMatches(text).toList();
+  ///
+  /// If [text] ends with `\r`, it will only be treated as a newline if the next
+  /// character at [position] is not a `\n`.
+  List<Match> _newlinesIn(String text) {
+    final newlines = _newlineRegExp.allMatches(text).toList();
+    // If the last character is a `\r` it will have been treated as a newline,
+    // but this is only valid if the next character is not a `\n`.
+    if (text.endsWith('\r') && peekChar() == $lf) {
+      // newlines should never be empty here, because if `text` ends with `\r`
+      // it would have matched `\r(?!\n)` in the newline regex.
+      newlines.removeLast();
+    }
+    return newlines;
+  }
 }
 
 /// A class representing the state of a [LineScanner].
