@@ -82,11 +82,10 @@ class LineScanner extends StringScanner {
         // character at that position itself (the next character) is a newline
         // we should not use it, so also offset to account for that.
         const currentCharOffset = -1;
-        // Find the last newline.
         final lastNewline = string.lastIndexOf(
             _newlineRegExp, newPosition + currentCharOffset + crOffset);
 
-        // No we need to know the offset after the newline. This is the index
+        // Now we need to know the offset after the newline. This is the index
         // above plus the length of the newline (eg. if we found `\r\n`) we need
         // to add two. However if no newline was found, that index is 0.
         final offsetAfterLastNewline = lastNewline == -1
