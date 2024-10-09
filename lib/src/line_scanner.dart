@@ -60,15 +60,20 @@ class LineScanner extends StringScanner {
       _line = 0;
       _column = 0;
     } else if (newPosition > oldPosition) {
-      final newlines = _newlinesIn(string.substring(oldPosition, newPosition));
+      final newlines = _newlinesIn(string.substring(oldPosition, newPosition),
+          endPosition: newPosition);
       _line += newlines.length;
       if (newlines.isEmpty) {
         _column += newPosition - oldPosition;
       } else {
-        _column = newPosition - newlines.last.end;
+        // The regex got a substring, so we need to account for where it started
+        // in the string.
+        final offsetOfLastNewline = oldPosition + newlines.last.end;
+        _column = newPosition - offsetOfLastNewline;
       }
     } else if (newPosition < oldPosition) {
-      final newlines = _newlinesIn(string.substring(newPosition, oldPosition));
+      final newlines = _newlinesIn(string.substring(newPosition, oldPosition),
+          endPosition: oldPosition);
 
       _line -= newlines.length;
       if (newlines.isEmpty) {
@@ -129,7 +134,7 @@ class LineScanner extends StringScanner {
   bool scan(Pattern pattern) {
     if (!super.scan(pattern)) return false;
 
-    final newlines = _newlinesIn(lastMatch![0]!);
+    final newlines = _newlinesIn(lastMatch![0]!, endPosition: position);
     _line += newlines.length;
     if (newlines.isEmpty) {
       _column += lastMatch![0]!.length;
@@ -141,15 +146,17 @@ class LineScanner extends StringScanner {
   }
 
   /// Returns a list of [Match]es describing all the newlines in [text], which
-  /// is assumed to end at [position].
+  /// ends at [endPosition].
   ///
   /// If [text] ends with `\r`, it will only be treated as a newline if the next
   /// character at [position] is not a `\n`.
-  List<Match> _newlinesIn(String text) {
+  List<Match> _newlinesIn(String text, {required int endPosition}) {
     final newlines = _newlineRegExp.allMatches(text).toList();
     // If the last character is a `\r` it will have been treated as a newline,
     // but this is only valid if the next character is not a `\n`.
-    if (text.endsWith('\r') && peekChar() == $lf) {
+    if (endPosition < string.length &&
+        text.endsWith('\r') &&
+        string[endPosition] == '\n') {
       // newlines should never be empty here, because if `text` ends with `\r`
       // it would have matched `\r(?!\n)` in the newline regex.
       newlines.removeLast();

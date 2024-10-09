@@ -19,7 +19,7 @@ void main() {
 
   group('scan()', () {
     test('consuming no newlines increases the column but not the line', () {
-      scanner.scan('foo');
+      scanner.expect('foo');
       expect(scanner.line, equals(0));
       expect(scanner.column, equals(3));
     });
@@ -307,6 +307,15 @@ void main() {
       expect(scanner.column, equals(1));
     });
 
+    test('forward from non-zero character through LFs sets the line and column',
+        () {
+      scanner = LineScanner('foo\nbar\nbaz');
+      scanner.expect('fo');
+      scanner.position = 9; // "foo\nbar\nb"
+      expect(scanner.line, equals(2));
+      expect(scanner.column, equals(1));
+    });
+
     test('forward through CR LFs sets the line and column', () {
       scanner = LineScanner('foo\r\nbar\r\nbaz');
       scanner.position = 11; // "foo\r\nbar\r\nb"
@@ -344,7 +353,7 @@ void main() {
 
     test('backward through LFs sets the line and column', () {
       scanner = LineScanner('foo\nbar\nbaz');
-      scanner.scan('foo\nbar\nbaz');
+      scanner.expect('foo\nbar\nbaz');
       scanner.position = 2; // "fo"
       expect(scanner.line, equals(0));
       expect(scanner.column, equals(2));
@@ -352,7 +361,7 @@ void main() {
 
     test('backward through CR LFs sets the line and column', () {
       scanner = LineScanner('foo\r\nbar\r\nbaz');
-      scanner.scan('foo\r\nbar\r\nbaz');
+      scanner.expect('foo\r\nbar\r\nbaz');
       scanner.position = 2; // "fo"
       expect(scanner.line, equals(0));
       expect(scanner.column, equals(2));
@@ -361,7 +370,7 @@ void main() {
     test('backward through CR not followed by LFs sets the line and column',
         () {
       scanner = LineScanner('foo\rbar\rbaz');
-      scanner.scan('foo\rbar\rbaz');
+      scanner.expect('foo\rbar\rbaz');
       scanner.position = 2; // "fo"
       expect(scanner.line, equals(0));
       expect(scanner.column, equals(2));
@@ -369,7 +378,7 @@ void main() {
 
     test('backward through CR at end sets the line and column', () {
       scanner = LineScanner('foo\rbar\r');
-      scanner.scan('foo\rbar\r');
+      scanner.expect('foo\rbar\r');
       scanner.position = 2; // "fo"
       expect(scanner.line, equals(0));
       expect(scanner.column, equals(2));
@@ -378,7 +387,7 @@ void main() {
     test('backward through a mix of CR, LF, CR+LF sets the line and column',
         () {
       scanner = LineScanner('0\n1\r2\r\n3');
-      scanner.scan(scanner.string);
+      scanner.expect(scanner.string);
 
       scanner.position = 1;
       expect(scanner.line, equals(0));
@@ -386,7 +395,7 @@ void main() {
     });
 
     test('backward through no newlines sets the column', () {
-      scanner.scan('foo\nbar\r\nbaz');
+      scanner.expect('foo\nbar\r\nbaz');
       scanner.position = 10; // "foo\nbar\r\nb"
       expect(scanner.line, equals(2));
       expect(scanner.column, equals(1));
@@ -398,22 +407,38 @@ void main() {
       expect(scanner.column, equals(4));
     });
 
+    test('forward from halfway through a CR LF counts as a line', () {
+      scanner.expect('foo\nbar\r');
+      scanner.position = 11; // "foo\nbar\r\nba"
+      expect(scanner.line, equals(2));
+      expect(scanner.column, equals(2));
+    });
+
     test('backward to between CR LF', () {
-      scanner.scan('foo\nbar\r\nbaz');
+      scanner.expect('foo\nbar\r\nbaz');
       scanner.position = 8; // "foo\nbar\r"
       expect(scanner.line, equals(1));
       expect(scanner.column, equals(4));
     });
 
+    test('backward from between CR LF', () {
+      scanner.expect('foo\nbar\r');
+      expect(scanner.line, equals(1));
+      expect(scanner.column, equals(4));
+      scanner.position = 5; // "foo\nb"
+      expect(scanner.line, equals(1));
+      expect(scanner.column, equals(1));
+    });
+
     test('backward to after CR LF', () {
-      scanner.scan('foo\nbar\r\nbaz');
+      scanner.expect('foo\nbar\r\nbaz');
       scanner.position = 9; // "foo\nbar\r\n"
       expect(scanner.line, equals(2));
       expect(scanner.column, equals(0));
     });
 
     test('backward to before CR LF', () {
-      scanner.scan('foo\nbar\r\nbaz');
+      scanner.expect('foo\nbar\r\nbaz');
       scanner.position = 7; // "foo\nbar"
       expect(scanner.line, equals(1));
       expect(scanner.column, equals(3));
@@ -421,7 +446,7 @@ void main() {
   });
 
   test('state= restores the line, column, and position', () {
-    scanner.scan('foo\nb');
+    scanner.expect('foo\nb');
     final state = scanner.state;
 
     scanner.scan('ar\nba');
