@@ -1,3 +1,7 @@
+## 1.4.1
+
+* Some cool change
+
 ## 1.4.0
 
 * Fix `LineScanner`'s handling of `\r\n`'s to preventing errors scanning
