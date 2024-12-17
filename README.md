@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> This repo has moved to https://github.com/dart-lang/tools/tree/main/pkgs/string_scanner
+
 [![Dart CI](https://github.com/dart-lang/string_scanner/actions/workflows/test-package.yml/badge.svg)](https://github.com/dart-lang/string_scanner/actions/workflows/test-package.yml)
 [![pub package](https://img.shields.io/pub/v/string_scanner.svg)](https://pub.dev/packages/string_scanner)
 [![package publisher](https://img.shields.io/pub/publisher/string_scanner.svg)](https://pub.dev/packages/string_scanner/publisher)
